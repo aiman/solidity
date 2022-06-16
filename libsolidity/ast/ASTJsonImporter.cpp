@@ -95,6 +95,24 @@ SourceLocation const ASTJsonImporter::createSourceLocation(Json::Value const& _n
 	return solidity::langutil::parseSourceLocation(_node["src"].asString(), m_sourceNames);
 }
 
+vector<SourceLocation> ASTJsonImporter::createSourceLocations(Json::Value const& _node, size_t _size) const
+{
+	vector<SourceLocation> locations;
+
+	if (_node.isMember("nameLocations") && _node["nameLocations"].isArray())
+		for (auto const& val: _node["nameLocations"])
+			locations.emplace_back(langutil::parseSourceLocation(val.asString(), m_sourceNames));
+	else
+		locations.resize(_size);
+
+	astAssert(
+		_size == locations.size(),
+		"SourceLocations don't match name paths."
+	);
+
+	return locations;
+}
+
 SourceLocation ASTJsonImporter::createNameSourceLocation(Json::Value const& _node)
 {
 	astAssert(member(_node, "nameLocation").isString(), "'nameLocation' must be a string");
@@ -880,7 +898,8 @@ ASTPointer<FunctionCall> ASTJsonImporter::createFunctionCall(Json::Value const& 
 		_node,
 		convertJsonToASTNode<Expression>(member(_node, "expression")),
 		arguments,
-		names
+		names,
+		createSourceLocations(_node, names.size())
 	);
 }
 
