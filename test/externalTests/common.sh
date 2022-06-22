@@ -24,13 +24,6 @@ set -e
 
 CURRENT_EVM_VERSION=london
 
-if [[ -f "$2" ]]
-then
-    ARGS=("$@")
-    ARGS[1]="$(realpath "$2")"
-    set -- "${ARGS[@]}"
-fi
-
 AVAILABLE_PRESETS=(
     legacy-no-optimize
     ir-no-optimize
